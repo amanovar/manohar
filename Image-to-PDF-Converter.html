@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <title>Project Report – Image to PDF Converter</title>
+  <style>
+    :root{
+      --bg:#0f172a;            /* slate-900 */
+      --card:#111827;          /* gray-900 */
+      --muted:#94a3b8;         /* slate-400 */
+      --text:#e5e7eb;          /* gray-200 */
+      --accent:#22d3ee;        /* cyan-400 */
+      --ring:#334155;          /* slate-700 */
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 10% -10%, #0b1223 0%, var(--bg) 45%) no-repeat, var(--bg);
+      color:var(--text);
+      line-height:1.6;
+    }
+    .wrap{
+      max-width: 880px;
+      margin: clamp(16px,4vw,48px) auto;
+      padding: 0 clamp(12px,2.5vw,20px);
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border: 1px solid var(--ring);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      overflow: hidden;
+    }
+    header{
+      padding: 28px clamp(18px,3vw,28px);
+      border-bottom: 1px solid var(--ring);
+      background:
+        radial-gradient(600px 200px at 20% 0%, rgba(34,211,238,.12), transparent 70%),
+        radial-gradient(700px 300px at 100% 0%, rgba(34,211,238,.08), transparent 60%),
+        transparent;
+    }
+    h1{
+      margin:0 0 6px;
+      font-size: clamp(24px, 2.6vw, 34px);
+      letter-spacing:.2px;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size: clamp(13px,1.4vw,15.5px);
+    }
+    .content{
+      padding: 22px clamp(18px,3vw,28px) 28px;
+      display:grid;
+      gap:22px;
+    }
+    .note{
+      background: rgba(34,211,238,.08);
+      border:1px dashed rgba(34,211,238,.45);
+      color:#d9fbff;
+      padding:14px 14px 14px 16px;
+      border-radius:12px;
+      font-size: 15px;
+    }
+    h2{
+      margin: 8px 0 6px;
+      font-size: clamp(18px,2vw,22px);
+      color: var(--accent);
+    }
+    p{margin:.3rem 0 .6rem;color:#eaf2f6}
+    ul{margin:.2rem 0 .4rem 1.2rem}
+    li{margin:.28rem 0}
+    .grid-2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:18px;
+    }
+
+    .scrollable-links {
+      display: flex;
+      overflow-x: auto;
+      gap: 12px;
+      padding: 10px 8px;
+      background: #0b1220cc;
+      border-bottom: 1px solid #ffffff20;
+      scrollbar-width: none;
+      font-size: 15px;
+    }
+    .scrollable-links::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollable-links a {
+      flex: 0 0 auto;
+      padding: 8px 14px;
+      border: 1px solid #ffffff25;
+      border-radius: 999px;
+      font-size: 14px;
+      color: #e5e7eb;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background .2s, border-color .2s;
+    }
+    .scrollable-links a:hover {
+      background: #1f2937;
+      border-color: #ffffff55;
+    }
+    .container {
+      width: 100%;
+      max-width: 450px;
+      margin: 32px auto 0 auto;
+      background:
+        radial-gradient(800px 400px at 10% -10%, #0ea5e930, transparent 60%),
+        radial-gradient(800px 400px at 110% 10%, #8b5cf630, transparent 60%),
+        var(--bg);
+      color: white;
+      padding: 18px 10px;
+      border-radius: 12px;
+      box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+      display: block;
+    }
+
+     .container:hover {
+     background:
+        radial-gradient(800px 400px at 10% -10%, #0ea5e930, transparent 60%),
+        radial-gradient(800px 400px at 110% 10%, #8b5cf630, transparent 60%),
+        var(--bg);
+      transform: scale(1.05);
+    }
+
+
+
+    
+    p {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 1rem;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    input[type="file"] {
+      border: none;
+      background:
+        radial-gradient(800px 400px at 10% -10%, #0ea5e930, transparent 60%),
+        radial-gradient(800px 400px at 110% 10%, #8b5cf630, transparent 60%),
+        var(--bg);
+      color: white;
+    }
+    button {
+      border: none;
+      background:
+        radial-gradient(800px 400px at 10% -10%, #0ea5e930, transparent 60%),
+        radial-gradient(800px 400px at 110% 10%, #8b5cf630, transparent 60%),
+        var(--bg);
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background .2s, transform .2s;
+    }
+    button:hover {
+     background:
+        radial-gradient(800px 400px at 10% -10%, #0ea5e930, transparent 60%),
+        radial-gradient(800px 400px at 110% 10%, #8b5cf630, transparent 60%),
+        var(--bg);
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 760px){
+      .grid-2{grid-template-columns: 1fr}
+
+       .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 10px 2px;
+        margin-top: 18px;
+      }
+      h1, h2 {
+        font-size: 1.1rem;
+      }
+      .scrollable-links {
+        font-size: 13px;
+        gap: 8px;
+        padding: 8px 2px;
+      }
+      input, button {
+        font-size: 0.95rem;
+        padding: 10px;
+      }
+    }
+    .section{
+      border:1px solid var(--ring);
+      border-radius:14px;
+      padding:16px;
+      background: rgba(17,24,39,.55);
+    }
+    .muted{color:var(--muted)}
+    .badge{
+      display:inline-block;
+      font-size:12px;
+      padding:4px 10px;
+      border:1px solid var(--ring);
+      border-radius:999px;
+      color:#dbeafe;
+      background: rgba(148,163,184,.12);
+      margin-right:6px;
+    }
+    details{
+      border:1px solid var(--ring);
+      border-radius:12px;
+      padding:12px 14px;
+      background: rgba(2,6,23,.6);
+    }
+    summary{
+      cursor:pointer;
+      font-weight:600;
+      color:#d1f6fb;
+      outline:none;
+    }
+    footer{
+      padding: 16px clamp(18px,3vw,28px) 24px;
+      border-top:1px solid var(--ring);
+      color:var(--muted);
+      font-size:13px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+  </style>
+</head>
+<body>
+     <!-- SCROLLABLE LINKS -->
+<div class="scrollable-links">
+   <a href="index.html">Home</a>
+  <a href="allinone.html">All-in-One Utility</a>
+  <a href="GST-Calculator.html">All Calculator</a>
+  <a href="BCA-101-Mathematics-I.html">BCA All Semester</a>
+  
+  <a href="C++Programming-Quiz.html">C Language Quiz</a>
+  <a href="Editor1.html">HTML Editor</a>
+  <a href="Notes-Maker.html">Whiteboard</a>
+  <a href="clanguage.html">C Language</a>
+  <a href="Project-Ideas.html">Project Ideas</a>
+  <a href="Image-to-PDF-Converter.html">Image to PDF Converter</a>
+  <a href="PDF-Library.html">Notes PDF Library</a>
+</div>
+
+
+
+
+
+
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1> Image to PDF Converter</h1>
+        <p class="subtitle">A lightweight, user-friendly tool to turn JPG/PNG images into a single, high-quality PDF.</p>
+      </header>
+
+      <div class="content">
+        <!-- Short version -->
+        <div class="note">
+          <strong>Short Version:</strong> This project is an <em>Image to PDF Converter</em> that lets users upload one or multiple images (JPG/PNG) and merge them into a single, high-quality PDF for easy sharing, printing, and storage. It’s fast, lightweight, and works smoothly on both desktop and mobile devices.
+        </div>
+
+          <div class="container">
+    <h2>Image to PDF Converter</h2>
+    <p>Select up to 500 images to convert into a single PDF</p>
+    <input type="file" id="imageInput" accept="image/*" multiple />
+    <br>
+    <button onclick="convertToPDF()">Convert to PDF</button>
+  </div>
+
+      
+
+        <!-- Introduction -->
+        <section class="section">
+          <h2>Introduction</h2>
+          <p>
+            The <strong>Image to PDF Converter</strong> simplifies converting images into the PDF format.
+            Users often need to combine notes, assignments, ID proofs, or document photos into one file.
+            This application accepts common image formats like <span class="mono">JPG</span> and <span class="mono">PNG</span>, then produces a clean, high-quality PDF output.
+            The goal is to make document management faster and easier for students, teachers, and professionals.
+          </p>
+        </section>
+
+        <!-- Objectives + Features -->
+        <div class="grid-2">
+          <section class="section">
+            <h2>Objectives</h2>
+            <ul>
+              <li>Provide a simple way to convert images into PDF.</li>
+              <li>Allow merging multiple images into a single PDF file.</li>
+              <li>Ensure fast performance and an intuitive UI.</li>
+              <li>Deliver high-quality, device-friendly output.</li>
+            </ul>
+          </section>
+
+          <section class="section">
+            <h2>Key Features</h2>
+            <ul>
+              <li>Single or bulk image to PDF conversion.</li>
+              <li>Optimized, high-quality PDF generation.</li>
+              <li>Clean, distraction-free interface.</li>
+              <li>Works on desktop and mobile.</li>
+              <li>Saves time when creating digital documents.</li>
+            </ul>
+          </section>
+        </div>
+
+        <!-- Tools -->
+        <section class="section">
+          <h2>Tools &amp; Technologies Used</h2>
+          <p><span class="badge">HTML</span><span class="badge">CSS</span><span class="badge">JavaScript</span></p>
+          <ul class="muted">
+            <li><strong>Frontend:</strong> HTML, CSS, JavaScript</li>
+            <li><strong>Backend / Libraries:</strong> (Mention if you used Python/Node.js/PHP and the specific PDF library)</li>
+            <li><strong>Output Format:</strong> PDF</li>
+          </ul>
+        </section>
+
+        <!-- Conclusion -->
+        <section class="section">
+          <h2>Conclusion</h2>
+          <p>
+            The <strong>Image to PDF Converter</strong> is a practical, time-saving tool for turning scattered images into an organized PDF.
+            With its straightforward workflow and reliable output, it helps students and professionals share and archive documents more efficiently.
+          </p>
+        </section>
+
+        <!-- Optional: Hindi brief (collapsible) -->
+        <details class="section">
+          <summary>Hindi (Short Intro)</summary>
+          <p>
+            यह प्रोजेक्ट एक <strong>Image to PDF Converter</strong> है जो आपकी इमेज (JPG/PNG)
+            को जल्दी और आसानी से एक <strong>PDF</strong> फाइल में बदल देता है। आप कई इमेज को
+            एक ही PDF में जोड़कर शेयर या प्रिंट कर सकते हैं। यह टूल हल्का, तेज़ और मोबाइल व
+            कंप्यूटर दोनों पर आसानी से चलता है।
+          </p>
+        </details>
+      </div>
+
+      <footer>
+        <span>Ready to copy & use ✨</span>
+        <span class="muted">Tip: Add your app screenshots below when submitting.</span>
+      </footer>
+    </div>
+  </div>
+
+
+  
+  <!-- jsPDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    async function convertToPDF() {
+      const { jsPDF } = window.jspdf;
+      const input = document.getElementById("imageInput");
+      const files = input.files;
+
+      if (files.length === 0) {
+        alert("Please select images first!");
+        return;
+      }
+      if (files.length > 500) {
+        alert("You can only select up to 500 images!");
+        return;
+      }
+
+      const pdf = new jsPDF();
+      let firstPage = true;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const imgData = await readFileAsDataURL(file);
+
+        if (!firstPage) pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 10, 10, 180, 260); // Adjust image fit
+        firstPage = false;
+      }
+
+      pdf.save("images.pdf");
+    }
+
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+  </script>
+</body>
+</html>
